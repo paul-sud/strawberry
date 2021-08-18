@@ -100,39 +100,27 @@ def type(
         wrapped = _wrap_dataclass(cls)
         extra_fields = _get_fields(wrapped)
 
-        for extra_field in extra_fields:
-            strawberry_field = StrawberryField(
-                python_name=annotation_name,
-                graphql_name=None,
-                # we need a default value when adding additional fields
-                # on top of a type generated from Pydantic, this is because
-                # Pydantic Optional fields always have None as default value
-                # which breaks dataclasses generation; as we can't define
-                # a field without a default value after one with a default value
-                # adding fields at the beginning won't work as we will also
-                # support default values on them (so the problem will be just
-                # shifted around)
-                default=None,
-            )
-            strawberry_field.type = type_
-            all_fields.append(
+        all_fields.extend(
+            (
                 (
-                    extra_field.name,
-                    extra_field.type,
-                    strawberry_field,
+                    field.name,
+                    field.type,
+                    field,
                 )
+                for field in extra_fields
             )
+        )
 
         # Sort fields so that fields with missing defaults go first
         # because dataclasses require that fields with no defaults are defined
         # first
         missing_default = []
         has_default = []
-        for field in all_fields:
-            if field[2].default is dataclasses.MISSING:
-                missing_default.append(field)
+        for dataclass_field in all_fields:
+            if dataclass_field[2].default is dataclasses.MISSING:
+                missing_default.append(dataclass_field)
             else:
-                has_default.append(field)
+                has_default.append(dataclass_field)
 
         sorted_fields = missing_default + has_default
 

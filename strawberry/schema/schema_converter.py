@@ -1,15 +1,7 @@
 from __future__ import annotations
 
 from enum import Enum
-<<<<<<< HEAD
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Tuple, Type, Union
-||||||| parent of 76b95bf (Rework field and resolver to create a nicer public api)
-from inspect import isasyncgen, iscoroutine
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Tuple, Type, Union
-=======
-from inspect import isasyncgen, iscoroutine
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Type, Union
->>>>>>> 76b95bf (Rework field and resolver to create a nicer public api)
 
 
 # TypeGuard is only available in typing_extensions => 3.10, we don't want
@@ -375,13 +367,9 @@ class GraphQLCoreConverter:
             )
 
         def _get_result(_source: Any, info: Info, **kwargs):
-            field_kwargs = _get_arguments(
-                source=_source, info=info, kwargs=kwargs
-            )
+            field_kwargs = _get_arguments(source=_source, info=info, kwargs=kwargs)
 
-            return field.get_result(
-                _source, info=info, arguments=field_kwargs
-            )
+            return field.get_result(_source, info=info, arguments=field_kwargs)
 
         def _resolver(_source: Any, info: GraphQLResolveInfo, **kwargs):
             strawberry_info = _strawberry_info_from_graphql(info)
