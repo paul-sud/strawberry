@@ -1,6 +1,6 @@
 from asyncio import ensure_future
 from inspect import isawaitable
-from typing import Any, Awaitable, Collection, List, Optional, Sequence, Type, cast
+from typing import Any, Awaitable, List, Optional, Sequence, Type, cast
 
 from graphql import (
     ExecutionContext as GraphQLExecutionContext,
@@ -10,7 +10,7 @@ from graphql import (
     execute as original_execute,
     parse,
 )
-from graphql.validation import ValidationRule, validate
+from graphql.validation import validate
 
 from strawberry.extensions import Extension
 from strawberry.extensions.runner import ExtensionsRunner
@@ -25,7 +25,6 @@ async def execute(
     additional_middlewares: List[Any] = None,
     execution_context_class: Optional[Type[GraphQLExecutionContext]] = None,
     validate_queries: bool = True,
-    validation_rules: Optional[Collection[Type[ValidationRule]]] = None,
 ) -> ExecutionResult:
     extensions_runner = ExtensionsRunner(
         execution_context=execution_context,
@@ -65,7 +64,9 @@ async def execute(
 
         if validate_queries:
             async with extensions_runner.validation():
-                validation_errors = validate(schema, document, rules=validation_rules)
+                validation_errors = validate(
+                    schema, document, rules=execution_context.validation_rules
+                )
 
             if validation_errors:
                 execution_context.errors = validation_errors
@@ -104,7 +105,6 @@ def execute_sync(
     additional_middlewares: List[Any] = None,
     execution_context_class: Optional[Type[GraphQLExecutionContext]] = None,
     validate_queries: bool = True,
-    validation_rules: Optional[Collection[Type[ValidationRule]]] = None,
 ) -> ExecutionResult:
     extensions_runner = ExtensionsRunner(
         execution_context=execution_context,
@@ -150,7 +150,7 @@ def execute_sync(
                 # run validation yet
                 if execution_context.errors is None:
                     validation_errors = validate(
-                        schema, document, rules=validation_rules
+                        schema, document, rules=execution_context.validation_rules
                     )
                     execution_context.errors = validation_errors
 
